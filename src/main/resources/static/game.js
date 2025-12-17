@@ -130,7 +130,7 @@ function connectSocket() {
 // --- 3. 렌더링 로직 (핵심 수정) ---
 function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#e3c986";
+    ctx.fillStyle = "#faf6ed";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = "#000";
@@ -279,8 +279,8 @@ function handleChatMessage(msg) {
         const winnerSkin = msg.winnerSkin || msg.skinUrl;
 
         // 승리자 정보 주입
-        img.src = winnerSkin || "https://via.placeholder.com/150/000000/FFFFFF?text=WINNER";
-        img.onerror = () => { img.src = "https://via.placeholder.com/150/000000/FFFFFF?text=WINNER"; };
+        img.src = winnerSkin || "https://placehold.co/150x150/000000/FFFFFF?text=WINNER";
+        img.onerror = () => { img.src = "https://placehold.co/150x150/000000/FFFFFF?text=WINNER"; };
         name.innerText = winnerName;
         modal.classList.remove('hidden');
         showChat(msg.sender, msg.content);
@@ -360,8 +360,8 @@ function closeAlert() {
 function updatePlayerProfile(stoneType, nickname, skinUrl) {
     // skinUrl이 없으면 기본 이미지 사용
     const defaultImg = stoneType === 1
-        ? "https://via.placeholder.com/40/000000/FFFFFF?text=B"
-        : "https://via.placeholder.com/40/FFFFFF/000000?text=W";
+        ? "https://placehold.co/40x40/000000/FFFFFF?text=B"
+        : "https://placehold.co/40x40/FFFFFF/000000?text=W";
 
     const finalUrl = skinUrl || defaultImg;
 
