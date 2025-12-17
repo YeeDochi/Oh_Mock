@@ -247,7 +247,18 @@ function handleChatMessage(msg) {
             document.getElementById('startBtn').style.display = 'none';
         }
     }
+    if (msg.type === 'JOIN') {
+        // msg.stoneType이 1이면 흑, 2면 백
+        if (msg.stoneType) {
+            updatePlayerProfile(msg.stoneType, msg.sender, msg.skinUrl);
+        }
+    }
 
+    // [추가] 착수(STONE) 메시지 처리: 게임 중 싱크가 안 맞을 경우를 대비해 갱신
+    if (msg.type === 'STONE' && msg.stoneType) {
+        // 돌을 둔 사람의 정보를 확실히 업데이트
+        updatePlayerProfile(msg.stoneType, msg.sender, msg.skinUrl);
+    }
     if (msg.type === 'START') {
         isGameEnded = false;
         currentTurn = 1;
@@ -344,4 +355,21 @@ function showAlert(msg) {
 function closeAlert() {
     const modal = document.getElementById('alert-modal');
     if (modal) modal.classList.add('hidden'); // hidden 클래스 추가하여 숨김
+}
+
+function updatePlayerProfile(stoneType, nickname, skinUrl) {
+    // skinUrl이 없으면 기본 이미지 사용
+    const defaultImg = stoneType === 1
+        ? "https://via.placeholder.com/40/000000/FFFFFF?text=B"
+        : "https://via.placeholder.com/40/FFFFFF/000000?text=W";
+
+    const finalUrl = skinUrl || defaultImg;
+
+    if (stoneType === 1) { // 흑돌
+        document.getElementById('p1-name').innerText = nickname;
+        document.getElementById('p1-img').src = finalUrl;
+    } else if (stoneType === 2) { // 백돌
+        document.getElementById('p2-name').innerText = nickname;
+        document.getElementById('p2-img').src = finalUrl;
+    }
 }

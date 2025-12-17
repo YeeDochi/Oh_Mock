@@ -34,6 +34,22 @@ public class GameService {
         message.setContent(message.getSender() + "님이 입장하셨습니다.");
         message.setStoneType(newPlayer.getStoneType());
         messagingTemplate.convertAndSend("/topic/" + roomId + "/chat", message);
+        for (Player p : room.getUsers()) {
+            // 방금 입장한 본인(newPlayer) 정보는 위에서 이미 보냈으니 패스
+            if (p.getId().equals(newPlayer.getId())) continue;
+
+            // 기존 플레이어(p)의 정보를 담은 메시지 생성
+            GameMessage existingPlayerMsg = GameMessage.builder()
+                    .type("JOIN") // 프론트에서 JOIN 타입을 받으면 프로필을 갱신하므로 이것을 재활용
+                    .sender(p.getNickname())
+                    .senderId(p.getId())
+                    .stoneType(p.getStoneType()) // 1(흑) 또는 2(백)
+                    .skinUrl(p.getSkinUrl())
+                    .build();
+
+            // 전송
+            messagingTemplate.convertAndSend("/topic/" + roomId + "/chat", existingPlayerMsg);
+        }
     }
 
     // [착수: 돌 놓기]
