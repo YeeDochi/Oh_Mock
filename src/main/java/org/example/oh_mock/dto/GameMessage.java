@@ -17,10 +17,23 @@ public class GameMessage {
     private Integer col;      // 오목판 열
     private Integer stoneType;// 흑백
 
+    private String winnerName;
+    private String winnerSkin;
+
     public static GameMessage SystemChatMessage(String content) {
         return GameMessage.builder()
                 .type("CHAT")
                 .sender("SYSTEM")
+                .content(content)
+                .build();
+    }
+
+    public static GameMessage SystemWinnerChatMessage(String content,String winnerName, String winnerSkin) {
+        return GameMessage.builder()
+                .type("CHAT")
+                .sender("SYSTEM")
+                .winnerName(winnerName)
+                .winnerSkin(winnerSkin)
                 .content(content)
                 .build();
     }

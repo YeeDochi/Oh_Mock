@@ -17,9 +17,12 @@ public class GameController {
 
     @MessageMapping("/{roomId}/join")
     public void join(@DestinationVariable String roomId, GameMessage message, SimpMessageHeaderAccessor headerAccessor) {
-        // 세션에 정보 저장 (Disconnect 이벤트 등에서 사용 가능)
-        headerAccessor.getSessionAttributes().put("roomId", roomId);
-        headerAccessor.getSessionAttributes().put("senderId", message.getSenderId());
+        // 세션 속성 저장 (디버깅용 로그 추가 가능)
+        if(headerAccessor.getSessionAttributes() != null) {
+            headerAccessor.getSessionAttributes().put("roomId", roomId);
+            headerAccessor.getSessionAttributes().put("senderId", message.getSenderId());
+            headerAccessor.getSessionAttributes().put("sender", message.getSender());
+        }
 
         gameService.join(roomId, message);
     }

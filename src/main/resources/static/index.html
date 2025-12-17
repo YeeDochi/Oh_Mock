@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Face Gomoku - 페이스 오목</title>
+    <title>game-hub/Oh_Mock</title>
     <link rel="stylesheet" href="/style.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
@@ -34,12 +34,27 @@
         .game-layout { display: flex; gap: 20px; }
         .game-meta { display: flex; justify-content: space-between; margin-bottom: 16px; align-items: center; }
     </style>
+    <link rel="icon" href="https://cdn.simpleicons.org/github/ffffff" type="image/svg+xml">
 </head>
 <body>
-
+<div id="alert-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:2000;">
+    <div class="box" style="width:320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div class="box-header">알림</div>
+        <div style="padding: 20px; text-align: center; color: var(--text-primary);">
+            <p id="alert-msg-text" style="margin: 0; word-break: keep-all;">메시지 내용</p>
+        </div>
+        <div style="padding:16px; border-top: 1px solid var(--border-color);">
+            <button class="btn-primary" onclick="closeAlert()" style="width: 100%;">확인</button>
+        </div>
+    </div>
+</div>
 <header>
     <div class="repo-breadcrumb">
-        <span style="font-weight:bold; font-size: 18px;">⚫⚪ Face Gomoku</span>
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" style="border-radius:50%; opacity:1;">
+        <a href="/" class="user-name">game-hub</a>
+        <span style="color:var(--text-primary)">/</span>
+        <a href="#" class="repo-name">Oh!_Mock</a>
+        <span class="badge">Public</span>
     </div>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark</button>
 </header>
@@ -107,13 +122,27 @@
             <div style="padding: 10px; border-top: 1px solid var(--border-color);">
                 <div style="display:flex; gap:5px;">
                     <input type="text" id="chatInput" placeholder="메시지 입력..." onkeypress="if(event.key==='Enter') sendChat()">
-                    <button class="btn-primary" onclick="sendChat()">전송</button>
+                    <button class="btn-primary" onclick="sendChat()" style="flex-shrink: 0;">전송</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<div id="ranking-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:999;">
+    <div class="box" style="width:360px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;">
+        <div class="box-header">🏆 게임 결과</div>
 
+        <div style="padding: 30px 20px;">
+            <img id="winnerImage" src="" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #2da44e; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div id="winnerName" style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 5px;">USER</div>
+            <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">승리를 축하합니다!</p>
+        </div>
+
+        <div style="padding:16px; border-top: 1px solid var(--border-color);">
+            <button class="btn-primary" onclick="exitRoom()" style="width: 100%; padding: 12px; font-size: 16px;">나가기</button>
+        </div>
+    </div>
+</div>
 <script src="/Oh_Mock/game.js"></script>
 </body>
 </html>

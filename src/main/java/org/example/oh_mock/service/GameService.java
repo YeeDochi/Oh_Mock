@@ -6,6 +6,7 @@ import org.example.oh_mock.dto.GameRoom;
 import org.example.oh_mock.dto.Player;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -14,18 +15,24 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
 
     // [입장]
-    public void join(String roomId, GameMessage message){
+    public synchronized void join(String roomId, GameMessage message){
         GameRoom room = roomService.findRoom(roomId);
-        if (room == null) return;
+        if (room == null) {
+            System.out.println("❌ 입장 실패: 방이 존재하지 않음 (" + roomId + ")");
+            return;
+        }
 
         Player newPlayer = new Player(message.getSender(), message.getSenderId());
-        newPlayer.setSkinUrl(message.getSkinUrl()); // 스킨 URL 저장
+        newPlayer.setSkinUrl(message.getSkinUrl());
 
-        room.assignSeat(newPlayer); // 흑/백 자동 배정
+        room.assignSeat(newPlayer); // 자리 배정
 
-        // 입장 알림
+        System.out.println("✅ 입장: " + message.getSender() + " (Role: " + newPlayer.getStoneType() + ")");
+        System.out.println("   현재 방 인원: " + room.getUsers().size() + "명 (Black: " + room.getBlackPlayerId() + ", White: " + room.getWhitePlayerId() + ")");
+
+        // 메시지 전송
         message.setContent(message.getSender() + "님이 입장하셨습니다.");
-        message.setStoneType(newPlayer.getStoneType()); // 배정된 돌 정보 전송
+        message.setStoneType(newPlayer.getStoneType());
         messagingTemplate.convertAndSend("/topic/" + roomId + "/chat", message);
     }
 
@@ -36,31 +43,37 @@ public class GameService {
 
         int row = message.getRow();
         int col = message.getCol();
-        int stoneType = message.getStoneType(); // 1(흑) or 2(백)
+        int stoneType = message.getStoneType();
 
-        // 유효성 검사: 현재 턴인가? 빈 칸인가?
-        if (room.getCurrentTurn() != stoneType) return;
+        // 1. 턴 체크: 현재 턴과 요청한 돌의 색이 다르면 무시
+        if (room.getCurrentTurn() != stoneType) {
+            System.out.println("착수 실패: 현재 턴(" + room.getCurrentTurn() + ") != 요청(" + stoneType + ")");
+            return;
+        }
+        // 2. 중복 착수 체크
         if (room.getBoard()[row][col] != 0) return;
 
-        // 1. 서버 메모리에 착수 기록
+        // 3. 착수 처리
         room.getBoard()[row][col] = stoneType;
 
-        // 2. 모든 클라이언트에게 착수 정보 전송 (그리기 요청)
+        // 4. 다음 턴 계산
+        int nextTurn = (stoneType == 1) ? 2 : 1;
+        room.setCurrentTurn(nextTurn);
+
+        // 5. 메시지 전송 (착수 정보 + 다음 턴 정보)
         message.setType("STONE");
+        message.setStoneType(stoneType);
         messagingTemplate.convertAndSend("/topic/" + roomId + "/stone", message);
 
-        // 3. 승리 판정
+        // 6. 승리 판정
         if (checkWin(room.getBoard(), row, col, stoneType)) {
             room.setPlaying(false);
             room.setWinnerId(message.getSenderId());
 
-            GameMessage winMsg = GameMessage.SystemChatMessage(
-                    "🎉 " + message.getSender() + "님이 승리하셨습니다! 게임 종료.");
+            GameMessage winMsg = GameMessage.SystemWinnerChatMessage(
+                    "🎉 " + message.getSender() + "님이 승리하셨습니다!",message.getSender(),message.getSkinUrl());
             winMsg.setType("GAME_OVER");
             messagingTemplate.convertAndSend("/topic/" + roomId + "/chat", winMsg);
-        } else {
-            // 4. 턴 넘기기
-            room.setCurrentTurn(stoneType == 1 ? 2 : 1);
         }
     }
 
@@ -94,9 +107,13 @@ public class GameService {
     public void Start(String roomId) {
         GameRoom room = roomService.findRoom(roomId);
         if (room != null) {
-            room.resetGame();
-            GameMessage msg = GameMessage.SystemChatMessage("게임을 시작합니다! 흑돌부터 시작하세요.");
+            room.resetGame(); // 턴을 1(흑)로 초기화
+
+            GameMessage msg = GameMessage.SystemChatMessage("게임을 시작합니다! 흑돌(⚫)부터 두세요.");
             msg.setType("START");
+            // 시작 시 흑돌 차례임을 명시
+            msg.setStoneType(1);
+            System.out.println("/topic/" + roomId + "/chat"+ new ObjectMapper().writeValueAsString(msg));
             messagingTemplate.convertAndSend("/topic/" + roomId + "/chat", msg);
         }
     }

@@ -21,6 +21,6 @@ public class UploadController {
         file.transferTo(new File(uploadDir + "/" + fileName));
 
         // 접근 가능한 URL 반환
-        return "/images/" + fileName;
+        return "/Oh_Mock/images/" + fileName;
     }
 }
