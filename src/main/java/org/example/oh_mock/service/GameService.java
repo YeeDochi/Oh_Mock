@@ -17,11 +17,15 @@ public class GameService {
     // [입장]
     public synchronized void join(String roomId, GameMessage message){
         GameRoom room = roomService.findRoom(roomId);
+
         if (room == null) {
             System.out.println("❌ 입장 실패: 방이 존재하지 않음 (" + roomId + ")");
             return;
         }
-
+        if (room.isPlaying()) {
+            System.out.println("❌ 입장 거부: 이미 게임 진행 중인 방 (" + roomId + ")");
+            return;
+        }
         Player newPlayer = new Player(message.getSender(), message.getSenderId());
         newPlayer.setSkinUrl(message.getSkinUrl());
 
