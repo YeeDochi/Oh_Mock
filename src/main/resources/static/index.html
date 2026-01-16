@@ -48,6 +48,17 @@
         </div>
     </div>
 </div>
+
+<div id="confirm-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;">
+    <div class="box" style="width:320px; margin: 0;">
+        <div class="box-header">확인</div>
+        <div style="padding: 20px; text-align: center;"><p id="confirm-msg-text" style="margin:0;">진행하시겠습니까?</p></div>
+        <div style="padding:16px; border-top: 1px solid var(--border-color); display:flex; gap:10px;">
+            <button class="btn-default" onclick="closeConfirm()" style="flex:1;">취소</button>
+            <button class="btn-primary" onclick="confirmOk()" style="flex:1;">확인</button>
+        </div>
+    </div>
+</div>
 <header>
     <div class="repo-breadcrumb">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" style="border-radius:50%; opacity:1;">
@@ -56,7 +67,13 @@
         <a href="#" class="repo-name">Oh!_Mock</a>
         <span class="badge">Public</span>
     </div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark</button>
+    <div style="display: flex; gap: 8px; align-items: center; margin-left: auto;">
+        <div id="loggedInArea" class="hidden" style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-primary); font-size: 14px;">👋 <b id="userNickname">User</b></span>
+            <button class="btn-default" onclick="logout()" style="padding: 4px 8px; font-size: 12px;">Sign out</button>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">Dark/Light</button>
+    </div>
 </header>
 
 <div id="login-screen" class="container" style="max-width: 400px; margin-top: 50px;">
@@ -140,9 +157,47 @@
             <div id="messages"></div>
             <div style="padding: 10px; border-top: 1px solid var(--border-color);">
                 <div style="display:flex; gap:5px;">
+                    <button class="btn-default" onclick="openImageModal()" style="padding: 0 8px; margin-right:5px;" title="이미지 전송">
+                        <i class="fas fa-images"></i>
+                    </button>
                     <input type="text" id="chatInput" placeholder="메시지 입력..." onkeypress="if(event.key==='Enter') sendChat()">
                     <button class="btn-primary" onclick="sendChat()" style="flex-shrink: 0;">전송</button>
                 </div>
+            </div>
+        </div>
+        <div id="image-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; justify-content:center; align-items:center;">
+            <div class="box" style="width: 500px; height: 600px; display:flex; flex-direction:column; background:var(--box-bg); padding:0; margin:0;">
+
+                <div style="padding:15px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap: 15px;">
+                        <strong style="font-size: 1.1em;">이미지 갤러리</strong>
+
+                        <label style="cursor: pointer; user-select: none; font-size: 13px; color: var(--text-secondary); display:flex; align-items:center; white-space: nowrap;">
+                            <input type="checkbox" id="starFilterCheckbox" onchange="Core.loadImages()" style="margin-right: 5px;">
+                            <span>★ 즐겨찾기만</span>
+                        </label>
+                    </div>
+
+                    <button onclick="Core.closeImageModal()" style="background:none; border:none; color:var(--text-primary); cursor:pointer; font-size:1.5em; line-height:1;">&times;</button>
+                </div>
+
+                <div style="padding:15px; border-bottom:1px solid var(--border-color); background:rgba(0,0,0,0.02);">
+                    <div style="display:flex; gap:5px; margin-bottom:10px;">
+                        <input type="text" id="linkInput" placeholder="이미지 주소(URL) 붙여넣기" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:4px;">
+                        <button class="btn-primary" onclick="Core.addExternalLink()" style="width:80px;">등록</button>
+                    </div>
+
+                    <input type="file" id="uploadInput" accept="image/*" style="display:none;" onchange="Core.uploadFile(this)">
+                    <button class="btn-default" onclick="document.getElementById('uploadInput').click()" style="width:100%; padding:8px; border:1px dashed var(--text-secondary); color: var(--text-secondary);">
+                        <i class="fas fa-plus"></i> 내 컴퓨터에서 업로드
+                    </button>
+                </div>
+
+                <div id="gallery-area" style="flex:1; padding:15px; overflow-y:auto; background: var(--box-bg);">
+                    <div id="server-img-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
